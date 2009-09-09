@@ -2,8 +2,15 @@ VLCcontrols is a cross browser javascript library to add controls to the VLC plu
 
 Works on IE/Firefox/Chrome/Safari
 
-now need some rewrite so moved to github !
+recent VLC >= 1.0 new security restrictions disable lots of plugin functionnality. now need some serious rewrite so moved to github !
 
-recent VLC >= 1.0 new security restrictions disable lots of plugin functionnality
+Workings examples : 
 
-Some tests here : http://vlc.revolunet.com
+simple : http://vlc.revolunet.com/git/example.html
+advanced : http://vlc.revolunet.com/git/advanced.html
+
+
+==== INSTALLATION ====
+
+Put all theses files somewhere on your web server.
+Read the doc at : http://www.revolunet.com/labo/code/VLCcontrols
