@@ -1,0 +1,306 @@
+<!--
+<OWNER> = revolunet
+<ORGANIZATION> = revolunet - Julien Bouquillon
+<YEAR> = 2008
+
+Copyright (c) 2008, revolunet
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met :
+
+
+ Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+ Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES ; LOSS OF USE, DATA, OR PROFITS ; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+-->
+
+
+<title>revolunet VLC javascript library demo</title>
+
+<script language="javascript" src="ExternalLibLoader.js"></script>
+ 
+<style>
+ * {
+ font-family:Trebuchet Ms, Arial;
+ font-size:12px;
+ }
+ select, input {
+	border:1px solid silver;
+ }
+</style>
+<script language="javascript" src="VLCobject.js"> </script>
+<script language="javascript" src="VLCcontrols.js"> </script>
+<script language="javascript">
+	 var vlc_controls = null;
+	 
+	 function init() {	
+		// load plugin
+		
+		myvlc = new VLCObject("mymovie", "350", "260");
+		myvlc.write("vlccontent");
+		
+		//myvlc.VLC_options.set("http-reconnect", 1);
+		//myvlc.VLC_options.set("http-reconnect", 5);
+
+		// load controls
+		vlc_controls = new VLCcontrols(myvlc);
+		
+		//vlc_controls.options.set("start-time", 60);
+		//vlc_controls.options.set("directx-wallpaper");
+		
+		vlc_controls.onready = function () {
+			//vlc_controls.play("http://images.apple.com/movies/wb/i_am_legend/i_am_legend-tlr1_h.480.mov");
+			var version = vlc_controls.target.versionInfo;
+			if(typeof(version)=="function") version = vlc_controls.target.versionInfo();
+			document.getElementById("vlc_version").innerHTML = version;
+		
+		}
+		//waitControlsLoaded();
+		
+		}
+	 
+	// function waitControlsLoaded() {
+	 
+		//if (!vlc_controls.loaded) {
+			//	setTimeout("waitControlsLoaded()", 250);
+				//return;
+		//}
+		
+		
+	// }
+    
+    
+
+// Supprime les espaces inutiles en début et fin de la chaîne passée en paramètre.
+String.prototype.trim = function()
+{
+    return this.replace(/(?:^\s+|\s+$)/g, "");
+}
+
+
+	 
+		function start() {
+            vlc_controls.options.clear();
+            var options_text = document.getElementById("shell").value.trim();
+            if (options_text!="") {
+            
+                var re = new RegExp(/^([^=\n]+)=?([^\n]*)$/gim);
+        
+                //alert(options_text.match(re));
+                
+                var rez = options_text.match(re);
+               
+               
+             //   var options_list = options_text.split("\n");
+              //  for (var i=0; i<options_list.length; i++) {
+                
+                
+                 for (var i=0; i<rez.length; i++) {
+              
+                
+                    var text = rez[i].trim();
+                    if (text=="") continue;
+                    if (text.indexOf("=") > 0) {
+                        var curoption = text.split("=");
+                        var curvalue = text.substring(text.indexOf("=")+1);
+                       // alert(curvalue);
+                        vlc_controls.options.set(curoption[0], curvalue);
+                    }
+                    else {
+                        vlc_controls.options.set(text);
+                    }
+                    //alert(options_list[i]);
+                }
+                //vlc_controls.options.set("start-time", 60);
+                }
+           
+
+            // subtitles           
+              if (document.getElementById("use_subtitles").checked && document.getElementById("subtitles").value!="") {
+                 vlc_controls.options.set("sub-file", document.getElementById("subtitles").value);
+               }
+               
+               
+               
+            if (document.getElementById("transcode").checked) {
+                var sout = "#transcode{vcodec=" + getSelectedValue(document.getElementById("output_vcodec")) + ",vb=" + getSelectedValue(document.getElementById("output_vb")) + ",acodec=" + getSelectedValue(document.getElementById("output_acodec")) + ",ab=" + getSelectedValue(document.getElementById("output_ab")) + ",soverlay}:duplicate{dst=display";
+              
+             
+               
+                   if (document.getElementById("file_output").checked && document.getElementById("file_output_name").value!="") {
+                        sout += ",dst=std{access=file,mux=" + getSelectedValue(document.getElementById("file_output_mux")) + ",dst=" + document.getElementById("file_output_name").value + "}";
+                   }
+                   
+                   if (document.getElementById("stream_output").checked && document.getElementById("stream_output_dst").value!="") {
+                        sout += ",dst=std{access=" + getSelectedValue(document.getElementById("stream_output_access")) + ",mux=" + getSelectedValue(document.getElementById("stream_output_mux")) + ",dst=" + document.getElementById("stream_output_dst").value + "}";
+                   }
+                   
+                   sout += "}";
+                   
+                  // alert(sout);
+               vlc_controls.options.set("sout", sout);
+           
+            }
+          vlc_controls.play(document.getElementById('filename').value)
+            var result = document.getElementById("result");
+            result.value = vlc_controls.options.format_for_vlc();
+        }   
+		
+		function getSelectedValue(obj) {
+            
+            var optn = obj.options[obj.selectedIndex];
+      
+            return optn.text;
+        }
+</script>
+
+<body onload="init()">
+
+
+<center>
+
+<b><a href="http://www.revolunet.com/labo/code/VLCcontrols">revolunet VLC controls javascript library demo - details</a></b>
+
+<br><br>
+This is an improved version than can use local or external subtitles, transcoding and streaming right from your browser
+<!--
+<br><br>
+<a href="http://vlc.revolunet.com">nouvelle demo : http://vlc.revolunet.com</a><br><br>
+-->
+
+
+
+
+
+<br><br>
+
+<table>
+<tr>
+<td>
+    <div id="vlccontent">replaced by VLC controller</div>
+
+</td>
+<td valign="top" align="center">
+    <b>Misc options</b><br><br>
+	VLC ActiveX/Mozilla version : <span id="vlc_version">not installed</span>
+    <table>
+        <tr>
+            <td>file to play (file or uri) : </td>
+            <td>
+                <input type="text" id="filename" value="http://www.revolunet.com/static/download/labo/VLCcontrols/bunny.mp4" size="60"/>
+            </td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" checked id="use_subtitles"/> subtitles (file or uri) : </td>
+            <td>
+                    <input type="text" id="subtitles" size=60 value="http://www.revolunet.com/static/download/labo/VLCcontrols/subtitles.srt"/>
+            </td>
+        </tr>
+         <tr>
+            <td><input type="checkbox"  id="transcode"/>  transcoding : </td>
+            <td>
+            
+               
+
+                    <select id="output_vcodec">
+                        <option>DIV1</option>
+                        <option>DIV2</option>
+                        <option selected >DIV3</option>
+                        <option>WMV1</option>
+                        <option>WMV2</option>
+                        <option>MP4V</option>
+                        <option>H264</option>
+                    </select>
+
+                    <select id="output_vb">
+                        <option>256</option>
+                        <option>512</option>
+                        <option>1024</option>
+                    </select>
+                    
+                    <select id="output_acodec">
+                        <option>asf</option>
+                        <option selected >mp3</option>
+                         
+                    </select>
+
+                    <select id="output_ab">
+                        <option>32</option>
+                        <option>64</option>
+                        <option>128</option>
+                    </select>
+                    
+            </td>
+        </tr>
+            
+         <tr>
+            <td><input type="checkbox"  id="file_output" onclick="if (!document.getElementById('transcode').checked) document.getElementById('transcode').checked=true;"/> file output : </td>
+            <td>
+                        
+                    mux : <select id="file_output_mux">
+                        <option  >ts</option>
+                        <option>ps</option>
+                        <option selected >ogg</option>
+                        <option>asf</option>
+                        <option>mp4</option>
+                        <option>mov</option>
+                        <option>raw</option>
+                    </select>
+                    <input type="text" id="file_output_name" size=50  value="c:\\output.avi" />
+
+                
+            </td>
+        </tr>
+          <tr>
+            <td><input type="checkbox"  id="stream_output" onclick="if (!document.getElementById('transcode').checked) document.getElementById('transcode').checked=true;"/> stream output : </td>
+            <td>
+                        
+                     <select id="stream_output_access">
+                        <option>http</option>
+                        <option>mmsh</option>
+                        <option>udp</option>
+                     </select>
+                     dst : <input type="text" id="stream_output_dst" size=20  value="0.0.0.0:1234" />
+
+                    <select id="stream_output_mux">
+                    <option selected >ts</option>
+                    <option>ps</option>
+                    <option  >ogg</option>
+                    <option>asf</option>
+                    <option>mp4</option>
+                    <option>mov</option>
+                    <option>raw</option>
+                    </select>
+     
+            </td>
+        </tr>
+        <tr>
+            <td valign=top >more vlc options : </td>
+            <td><textarea id="shell" style="width:300;height:100">start-time=30
+http-reconnect
+http-caching=1000
+udp-caching=1000
+
+
+                </textarea><br>
+
+         </td>
+        </tr>
+    </table>
+    <br><Br>
+    <button onclick="start()">launch VLC with all these options</button>
+    
+</td></tr></table>
+<br><br>
+resulting command line : <input type=text id="result" size="130">
+
+
+<p>&nbsp;</p>
+any comments welcome on : <a href="mailto:contact@revolunet.com&subject=VLCcontrols">contact@revolunet.com</a>
+
+</center>
+
+</body>

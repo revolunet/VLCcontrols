@@ -1,0 +1,48 @@
+
+
+
+<html>
+<title>Simplest VLC plugin test</title>
+<script language="javascript">
+
+function play(tgt) {
+    var uri = "http://ipod.free.fr/itrafik.mp4";
+    if (document.all) tgt += "_IE"
+    var tgt = document.getElementById(tgt);
+   // alert(tgt);
+    if (document.all) tgt.playlist.add(uri,uri, new Array());
+    else     tgt.playlist.add(uri,uri, "");
+    tgt.playlist.play(); 
+}
+function reload() {
+    document.body.innerHTML="";
+    setTimeout("document.location.reload();", 500);
+}
+</script>
+<body onload="play('vlc1')">
+<h1>Simplest VLC plugin test</h1>
+
+<a href="http://vlc.revolunet.com">>> back to revolunet VLC Lab</a>
+<br><br>
+<OBJECT id='vlc1_IE'  codeBase=http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab height=240 width=320 classid=clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921>
+<embed type="application/x-vlc-plugin" pluginspage="http://www.videolan.org" version="VideoLAN.VLCPlugin.2"
+    width="320"
+    height="240"
+    id="vlc1">
+</embed>
+</OBJECT> 
+
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+			</script>
+			<script type="text/javascript">
+			_uacct = "UA-294393-1";
+			urchinTracker();
+			</script>
+
+<hr>
+<button onclick="play('vlc1')">play in VLC1</button>
+<br><br>
+ 
+<button onclick="reload()">reload</button>
+</body>
+</html>

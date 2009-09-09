@@ -1,0 +1,102 @@
+<!--
+<OWNER> = revolunet
+<ORGANIZATION> = revolunet - Julien Bouquillon
+<YEAR> = 2008
+
+Copyright (c) 2008, revolunet
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met :
+
+
+ Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+ Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES ; LOSS OF USE, DATA, OR PROFITS ; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+-->
+
+
+<title>revolunet VLC javascript library demo</title>
+
+<script language="javascript" src="ExternalLibLoader.js"></script>
+ 
+<style>
+ * {
+ font-family:Trebuchet Ms, Arial;
+ font-size:12px;
+ }
+ select, input {
+	border:1px solid silver;
+ }
+</style>
+<script language="javascript" src="VLCobject.js"> </script>
+<script language="javascript" src="VLCcontrols.js"> </script>
+<script language="javascript">
+	 var vlc_controls = null;
+	 
+	 function init() {	
+		// load plugin
+		
+		myvlc = new VLCObject("mymovie", "600", "350");
+		myvlc.write("vlccontent");
+		
+		//myvlc.VLC_options.set("http-reconnect", 1);
+		//myvlc.VLC_options.set("http-reconnect", 5);
+
+		// load controls
+		vlc_controls = new VLCcontrols(myvlc);
+		
+		vlc_controls.options.set("start-time", 60);
+		//vlc_controls.options.set("directx-wallpaper");
+		
+		vlc_controls.onready = function () {
+			vlc_controls.play("http://images.apple.com/movies/wb/i_am_legend/i_am_legend-tlr1_h.480.mov");
+		
+		}
+		//waitControlsLoaded();
+		
+		}
+	 
+	// function waitControlsLoaded() {
+	 
+		//if (!vlc_controls.loaded) {
+			//	setTimeout("waitControlsLoaded()", 250);
+				//return;
+		//}
+		
+		
+	// }
+	 
+		
+		
+		
+</script>
+
+<body onload="init()">
+
+
+<center>
+
+<b><a href="http://code.revolunet.com/VLCcontrols/FR">revolunet VLC controls javascript library demo - details</a></b>
+
+<!--
+<br><br>
+<a href="http://vlc.revolunet.com">nouvelle demo : http://vlc.revolunet.com</a><br><br>
+-->
+
+<br><br>
+
+<div id="vlccontent">replaced by VLC controller</div>
+ 
+
+<p>&nbsp;</p>
+<b>try any uri or local file : </b><br><br>
+<img src="uri.png"/>&nbsp;<input type="text" id="filename" value="http://images.apple.com/movies/wb/i_am_legend/i_am_legend-tlr1_h.480.mov" size="100"/><button onclick="vlc_controls.play(document.getElementById('filename').value)">play</button>
+<p>&nbsp;</p>
+any comments welcome on : <a href="mailto:contact@revolunet.com&subject=VLCjs">contact@revolunet.com</a>
+
+</center>
+
+</body>
