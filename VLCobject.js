@@ -104,7 +104,23 @@ revolunet.VLCObject.prototype = {
 			
 		}
 		return false;
+	},
+    ///////////////////////////////////////////////////////new methods for hide/show tag object/embed////////////////////////////////////////////////////////////////////// 	
+	hideVLC: function(id){
+        var id = this.getAttribute('id');
+		if(document.getElementById){
+			document.getElementById(id).style.visibility = 'hidden';
+		}
+	},
+	showVLC: function(id){
+        var id = this.getAttribute('id');
+		if(document.getElementById){
+			document.getElementById(id).style.visibility = 'visible';	
+		}
 	}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    
+    
 	 
 }
 

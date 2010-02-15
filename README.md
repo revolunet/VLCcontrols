@@ -17,6 +17,11 @@ Some docs here : [http://www.revolunet.com/labo/code/VLCcontrols][1]
     // create a VLCobject in div#mymovie
     var vlcobject = new VLCObject("mymovie", "600", "350");
     vlcobject.write("vlccontent");
+        
+        // show hide VLC
+        vlcobject.hideVLC();
+        vlcobject.showVLC();
+        
     // create controls and bind to an existing VLCobject
     var controls = new VLCcontrols(vlcobject);     
     // set a VLC option; here the media will start at 50secs. see http://wiki.videolan.org/VLC_command-line_help for all options (some restricted in the plugins)

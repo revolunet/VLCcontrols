@@ -503,33 +503,37 @@ VLCcontrols.prototype.updateStatus = function() {
  //       this.debug("default updateStatus "+ this.target.input.hasVout);
  
         var play_status = document.getElementById("play_status");
-				if(this.target.playlist && this.target.playlist.isPlaying == true && this.target.input)
-				{	
+
 					try {
-						var h = formatTime(this.target.input.time);
-						if (parseInt(h) < 1000)  {
-							changeImageSrc(this.id + "_btn_play", this.root + "images/" + VLC_controller_icon_pause);
-							if (parseInt(this.target.input.length) == 0)  {
-								this.updateStatusFromExternalData();
-							}
-							else {
-								document.getElementById("infosPosition").innerHTML = h+"/"+formatTime(this.target.input.length);								
-								VLC_controller.position = this.target.input.position;
-								this.setSliderPos(this.target.input.position);
-								}
-							 }
-						 if (this.target.input && this.target.input.hasVout) this.showVideo();
-						 else  this.hideVideo();
+                            if (this.target.playlist && (this.target.playlist.isPlaying == true) && this.target.input)
+                            {	
+                                    var h = formatTime(this.target.input.time);
+                                    if (parseInt(h) < 1000)  {
+                                        changeImageSrc(this.id + "_btn_play", this.root + "images/" + VLC_controller_icon_pause);
+                                        if (parseInt(this.target.input.length) == 0)  {
+                                            this.updateStatusFromExternalData();
+                                        }
+                                        else {
+                                            document.getElementById("infosPosition").innerHTML = h+"/"+formatTime(this.target.input.length);								
+                                            VLC_controller.position = this.target.input.position;
+                                            this.setSliderPos(this.target.input.position);
+                                            }
+                                         }
+                                     if (this.target.input && this.target.input.hasVout) this.showVideo();
+                                     else  this.hideVideo();
+                                     
+                                        }
+                            else
+                            {
+                                document.getElementById("infosPosition").innerHTML = "00:00/00:00";
+                                changeImageSrc(this.id + "_btn_play", this.root + "images/" + VLC_controller_icon_play);
+                                this.hideVideo();
+                                this.setSliderPos(0);
+                            }
+                            
 						}
 					catch(e) {}
-		        }
-		        else
-		        {
-					document.getElementById("infosPosition").innerHTML = "00:00/00:00";
-					changeImageSrc(this.id + "_btn_play", this.root + "images/" + VLC_controller_icon_play);
-					this.hideVideo();
-					this.setSliderPos(0);
-		        }
+		     
 				this.updateStatusText();
 				this.updateVlcMessages();
     }
