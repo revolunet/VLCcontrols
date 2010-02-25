@@ -9,8 +9,7 @@ Some docs here : [http://www.revolunet.com/labo/code/VLCcontrols][1]
 
 **Examples :** 
 
- - simple : [http://vlc.revolunet.com/git/example.html][4]
- - advanced : [http://vlc.revolunet.com/git/advanced.html][5]
+ - The example are on GitHub pages : [http://revolunet.github.com/VLCcontrols][4]
 
 **API :** 
 
@@ -40,5 +39,4 @@ Put all theses files somewhere on your web server :)
   [1]: http://www.revolunet.com/labo/code/VLCcontrols
   [2]: http://wiki.videolan.org/VLC_command-line_help
   [3]: http://blog.deconcept.com/swfobject/
-  [4]: http://vlc.revolunet.com/git/example.html
-  [5]: http://vlc.revolunet.com/git/advanced.html
+  [4]: http://revolunet.github.com/VLCcontrols
