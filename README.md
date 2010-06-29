@@ -18,7 +18,7 @@ recent VLC >= 1.0 new security restrictions disable lots of plugin functionnalit
     var player = VLCobject.embedPlayer('vlc1', 400, 300, true);
     player.play('http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_480p_surround-fix.avi');
     
-    // set a VLC option    
+    // set a [VLC option][2]
     player.options.set("start-time", 50); 
     // reset all VLC options
     player.options.clear(); 
@@ -27,10 +27,17 @@ recent VLC >= 1.0 new security restrictions disable lots of plugin functionnalit
     // stop playing
     player.stop(); 
 
+    
 **INSTALLATION**
 
-Put all theses files somewhere on your web server :)
+You can directly use our hosting and google jQuery CDN for js+images+css :
 
+    <script language="javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script language="javascript" src="http://revolunet.github.com/VLCcontrols/src/jquery-vlc.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://revolunet.github.com/VLCcontrols/src/styles.css" />
+
+    
+    
   [1]: http://www.revolunet.com/labo/code/VLCcontrols
   [2]: http://wiki.videolan.org/VLC_command-line_help
   [3]: http://blog.deconcept.com/swfobject/
