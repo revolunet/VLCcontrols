@@ -1,0 +1,626 @@
+<html>
+
+    <head>
+        <script language="javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <!--
+        <script language="javascript" src="Ext.ux.VLCplayer.js"></script>
+        -->
+        <script language="javascript">
+            var VLCobject = {
+                     VLC_PLUGIN:"VLC Multimedia Plug-in"
+                    ,VLC_AX:"VideoLAN.VLCPlugin.2"
+                    ,VLC_MIME_TYPE:"application/x-vlc-plugin"
+                    ,TOOLBAR_HEIGHT:5
+                    ,INSTANCES:{}           // holds multiples instances
+                    ,UNICODES:{
+                        PLAY:'\u25ba'
+                       ,PAUSE:'\u2590  \u258c'
+                       ,STOP:'\u2588'
+                    }
+                    ,ua:function() {
+                        // browser detection  stuff
+                            var w3cdom = typeof document.getElementById != 'undefined' && typeof document.getElementsByTagName != 'undefined' && typeof document.createElement != 'undefined',
+                                    u = navigator.userAgent.toLowerCase(),
+                                    p = navigator.platform.toLowerCase(),
+                                    windows = p ? /win/.test(p) : /win/.test(u),
+                                    mac = p ? /mac/.test(p) : /mac/.test(u),
+                                    webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, // returns either the webkit version or false if not webkit
+                                    ie = !+"\v1", // feature detection based on Andrea Giammarchi's solution: http://webreflection.blogspot.com/2009/01/32-bytes-to-know-if-your-browser-is-ie.html
+                                    playerVersion = [0,0,0],
+                                    d = null;
+                            if (typeof navigator.plugins != 'undefined' && typeof navigator.plugins[this.VLC_PLUGIN] == 'object') {
+                                    d = navigator.plugins[this.VLC_PLUGIN].description;
+                                    if (d && !(typeof navigator.mimeTypes != 'undefined' && navigator.mimeTypes[this.VLC_MIME_TYPE] && !navigator.mimeTypes[this.VLC_MIME_TYPE].enabledPlugin)) { // navigator.mimeTypes[VLC_MIME_TYPE].enabledPlugin indicates whether plug-ins are enabled or disabled in Safari 3+
+                                            plugin = true;
+                                            ie = false; // cascaded feature detection for Internet Explorer
+                                            d = d.replace(/^.*\s+(\S+\s+\S+$)/, "$1");
+                                            playerVersion[0] = parseInt(d.replace(/^(.*)\..*$/, "$1"), 10);
+                                            playerVersion[1] = parseInt(d.replace(/^.*\.(.*)\s.*$/, "$1"), 10);
+                                            playerVersion[2] = /[a-zA-Z]/.test(d) ? parseInt(d.replace(/^.*[a-zA-Z]+(.*)$/, "$1"), 10) : 0;
+                                    }
+                            }
+                            else if (typeof window.ActiveXObject != 'undefined') {
+                                    try {
+                                            var a = new ActiveXObject(this.VLC_AX);
+                                            if (a) { // a will return null when ActiveX is disabled
+                                                    d = a.GetVariable("$version");
+                                                    if (d) {
+                                                            ie = true; // cascaded feature detection for Internet Explorer
+                                                            d = d.split(" ")[1].split(",");
+                                                            playerVersion = [parseInt(d[0], 10), parseInt(d[1], 10), parseInt(d[2], 10)];
+                                                    }
+                                            }
+                                    }
+                                    catch(e) {}
+                            }
+                            return { w3:w3cdom, pv:playerVersion, wk:webkit, ie:ie, win:windows, mac:mac };
+                        }()
+                        
+                    ,createVLC:function(attObj, parObj, id) {
+                            var r, el = document.getElementById(id);
+                            if (el) {
+                                    if (typeof attObj.id == 'undefined') { // if no 'id' is defined for the object element, it will inherit the 'id' from the alternative content
+                                            attObj.id = id;
+                                    }
+                                    if (this.ua.ie && this.ua.win) { // Internet Explorer + the HTML object element + W3C DOM methods do not combine: fall back to outerHTML
+                                            var att = "";
+                                            for (var i in attObj) {
+                                                    if (attObj[i] != Object.prototype[i]) { // filter out prototype additions from other potential libraries
+                                                            if (i.toLowerCase() == "data") {
+                                                                    parObj.movie = attObj[i];
+                                                            }
+                                                            else if (i.toLowerCase() == "styleclass") { // 'class' is an ECMA4 reserved keyword
+                                                                    att += ' class="' + attObj[i] + '"';
+                                                            }
+                                                            else if (i.toLowerCase() != "classid") {
+                                                                    att += ' ' + i + '="' + attObj[i] + '"';
+                                                            }
+                                                    }
+                                            }
+                                            var par = "";
+                                            for (var j in parObj) {
+                                                    if (parObj[j] != Object.prototype[j]) { // filter out prototype additions from other potential libraries
+                                                            par += '<param name="' + j + '" value="' + parObj[j] + '" />';
+                                                    }
+                                            }
+                                            el.outerHTML = '<object classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"' + att + '>' + par + '</object>';
+                                            r = document.getElementById(attObj.id);  
+                                    }
+                                    else { // well-behaving browsers
+                                            var o = document.createElement('object');
+                                            o.setAttribute("type", this.VLC_MIME_TYPE);
+                                            for (var m in attObj) {
+                                                    if (attObj[m] != Object.prototype[m]) { // filter out prototype additions from other potential libraries
+                                                            if (m.toLowerCase() == "styleclass") { // 'class' is an ECMA4 reserved keyword
+                                                                    o.setAttribute("class", attObj[m]);
+                                                            }
+                                                            else if (m.toLowerCase() != "classid") { // filter out IE specific attribute
+                                                                    o.setAttribute(m, attObj[m]);
+                                                            }
+                                                    }
+                                            }
+                                            for (var n in parObj) {
+                                                    if (parObj[n] != Object.prototype[n] && n.toLowerCase() != "movie") { // filter out prototype additions from other potential libraries and IE specific param element
+                                                            this.createObjParam(o, n, parObj[n]);
+                                                    }
+                                            }
+                                            el.parentNode.replaceChild(o, el);
+                                            r = o;
+                                    }
+                            }
+                            //console.log('createVLC ' +r);
+                            return r;
+                    }
+
+                    ,createObjParam:function(el, pName, pValue) {
+                            var p = document.createElement("param");
+                            p.setAttribute("name", pName);  
+                            p.setAttribute("value", pValue);
+                            el.appendChild(p);
+                    }
+
+                    /* Cross-browser SWF removal
+                            - Especially needed to safely and completely remove a SWF in Internet Explorer
+                    */
+                    ,removeVLC:function(id) {
+                            var obj = document.getElementById(id);
+                            if (obj && obj.nodeName == "OBJECT") {
+                                    if (this.ua.ie && this.ua.win) {
+                                            obj.style.display = "none";
+                                            (function(){
+                                                    if (obj.readyState == 4) {
+                                                            this.removeObjectInIE(id);
+                                                    }
+                                                    else {
+                                                            setTimeout(arguments.callee, 10);
+                                                    }
+                                            })();
+                                    }
+                                    else {
+                                            obj.parentNode.removeChild(obj);
+                                    }
+                            }
+                    }
+
+                    ,removeObjectInIE:function(id) {
+                            var obj = document.getElementById(id);
+                            if (obj) {
+                                    for (var i in obj) {
+                                            if (typeof obj[i] == "function") {
+                                                    obj[i] = null;
+                                            }
+                                    }
+                                    obj.parentNode.removeChild(obj);
+                            }
+                    }
+                    
+                    ,embedVLC:function(replaceElemIdStr, widthStr, heightStr, vlcVersionStr, flashvarsObj, parObj, attObj, callbackFn) {
+                                        var callbackObj = {success:false, id:replaceElemIdStr};
+                                        //console.log(arguments);
+                                        if (this.ua.w3 && !(this.ua.wk && this.ua.wk < 312) && replaceElemIdStr && widthStr && heightStr) {
+                                                //setVisibility(replaceElemIdStr, false);
+                                               // addDomLoadEvent(function() {
+                                                        widthStr += ""; // auto-convert to string
+                                                        heightStr += "";
+                                                        var att = {};
+                                                        if (attObj && typeof attObj === 'object') {
+                                                                for (var i in attObj) { // copy object to avoid the use of references, because web authors often reuse attObj for multiple SWFs
+                                                                        att[i] = attObj[i];
+                                                                }
+                                                        }
+                                                     //   att.data = swfUrlStr;
+                                                        att.width = widthStr;
+                                                        att.height = heightStr;
+                                                        var par = {}; 
+                                                        if (parObj && typeof parObj === 'object') {
+                                                                for (var j in parObj) { // copy object to avoid the use of references, because web authors often reuse parObj for multiple SWFs
+                                                                        par[j] = parObj[j];
+                                                                }
+                                                        }
+                                                        if (flashvarsObj && typeof flashvarsObj === 'object') {
+                                                                for (var k in flashvarsObj) { // copy object to avoid the use of references, because web authors often reuse flashvarsObj for multiple SWFs
+                                                                        if (typeof par.flashvars != 'undefined') {
+                                                                                par.flashvars += "&" + k + "=" + flashvarsObj[k];
+                                                                        }
+                                                                        else {
+                                                                                par.flashvars = k + "=" + flashvarsObj[k];
+                                                                        }
+                                                                }
+                                                        }
+                                                        if (!vlcVersionStr || hasPlayerVersion(vlcVersionStr)) { // create SWF
+                                                                var obj = this.createVLC(att, par, replaceElemIdStr);
+                                                                	if (document.all) {
+                                                                    
+                                                                        obj.style.width = widthStr;
+                                                                        obj.style.height= heightStr;
+                                                                     }
+                                                                if (att.id == replaceElemIdStr) {
+                                                                        //setVisibility(replaceElemIdStr, true);
+                                                                }
+                                                                callbackObj.success = true;
+                                                                callbackObj.ref = obj;
+                                                        }
+                                                       
+                                                        else { // show alternative content
+                                                                //setVisibility(replaceElemIdStr, true);
+                                                        }
+                                                        if (callbackFn) { callbackFn(callbackObj); }
+                                               // });
+                                        }
+                                        else if (callbackFn) { callbackFn(callbackObj); }
+                                }
+                    
+                    ,embedPlayer:function(replaceElemIdStr, widthStr, heightStr, add_toolbar) {
+                            var tbHeight = add_toolbar?this.TOOLBAR_HEIGHT:0;
+                            
+                            var plugin_height = (parseInt(heightStr) - tbHeight);
+                            $('#' + replaceElemIdStr).html('');
+                            $('#' + replaceElemIdStr).height(parseInt(heightStr));
+                            var tbar =  "<div id='" + replaceElemIdStr + "-main'  class='x-vlcplayer-main' style='width:" + widthStr + "px;height:" + heightStr + "px' >";
+                            tbar += "<div id='" + replaceElemIdStr + "_plugin' class='x-vlcplayer-plugin' ></div>";
+                            tbar += "<div style='overflow:hide;width:" + widthStr + "px;height:" + tbHeight + "px' id='" + replaceElemIdStr + "_toolbar', class='x-vlcplayer-toolbar' ></div>";
+                            tbar += "</div>";
+                            $('#' + replaceElemIdStr).append(tbar )
+                            this.embedVLC(replaceElemIdStr + '_plugin', widthStr, plugin_height.toString());
+                            if (typeof(this.INSTANCES[replaceElemIdStr]) == 'undefined') {
+                                this.INSTANCES[replaceElemIdStr] = playerInstance(replaceElemIdStr);
+                            }
+                         
+                            if (add_toolbar) {
+                                this.addToolbar(replaceElemIdStr);
+                            }
+                            else {
+                                $('#' + replaceElemIdStr + '_toolbar').hide(); //default hide toolba
+                            }
+                             //this.INSTANCES[replaceElemIdStr].addEvents();
+                            return this.INSTANCES[replaceElemIdStr];
+             
+                       }
+       
+                      
+                       ,addToolbar:function(playerId) {
+                            if(!playerId) playerId=this.INSTANCES[0];
+                            var tgt = $('#' + playerId + '_toolbar');
+                            tgt.html('');
+                            this.createButton(playerId, '&nbsp;&nbsp;', 'x-vlc-btn-play', function(event) {
+                                //alert('play '+  event.data.instance.playerId);
+                                event.data.instance.togglePlay();
+                            });
+                            this.createButton(playerId, '&nbsp;&nbsp;', 'x-vlc-btn-stop', function(event) {
+                                //alert('stop '+  event.data.instance.playerId);
+                                event.data.instance.stop();
+                            });
+                            this.createSlider(playerId);
+                            this.createTimer(playerId);
+                            tgt.show();
+                       }
+                       ,remove:function(playerId) {
+                            if(!playerId) playerId=this.INSTANCES[0];
+                            delete this.INSTANCES[playerId] ;
+                       }
+                       ,createButton:function(playerId, html, cls, handler) {
+                            var tgt =   $('#' + playerId + '_toolbar');
+                            var id = playerId + '_toolbar_btn' + tgt[0].childNodes.length;
+                            var btn = "<span id='" + id + "' style='width:20px;text-align:center;cursor:pointer' class='x-vlc-btn "+cls+"' >" + html + "</span>";
+                            tgt.append(btn);
+                            var instance = this.getInstance(playerId);
+                            if (handler) {
+                                $('#' + id).bind('click', {instance: instance}, handler);
+                            }
+                       }
+                      
+                       ,sliderCreated:false
+                       ,createSlider:function(playerId) {
+                            if ( this.sliderCreated) return;
+                            var tgt =   $('#' + playerId + '_toolbar' );
+                            var slider_width = tgt.width() - 120;
+                            //console.log('slider_width', slider_width)
+                            var id =  playerId + '_toolbar_slider'; 
+                            //var slider = "<div id='" + id + "' style='overflow:left;width:" + slider_width+";text-align:center;cursor:pointer;' class='x-vlc-slider' >&nbsp;<span id='" + id + "_thumb' class='x-vlc-slider-thumb'>&nbsp;</span>&nbsp;</div>";
+                            var slider = "<span id='" + id + "' width='" + slider_width+"'  style='height:10px'><table border=0  id=''    style='cursor:pointer;display:inline' cellpadding=0 cellspacing=0 ><tr ><td width='0' class='x-vlc-slider'></td><td class='x-vlc-slider-thumb'>&nbsp;</td><td width='" + (slider_width) + "' class='x-vlc-slider'>&nbsp;</td></tr></table></span>";
+                            tgt.append(slider);
+                            $('#' + id).bind('click', {instance:this.getInstance(playerId)}, this.onSliderClick);
+                            this.sliderCreated = true;
+                       }
+                       ,createTimer:function(playerId) {
+                            var tgt =   $('#' + playerId + '_toolbar' );
+                            var timer = "<span id='" + playerId + "_timer' style='text-align:center;' class='x-vlc-timer'>&nbsp;00:00/00:00&nbsp;</span>"
+                            tgt.append(timer);
+                       }
+                       ,onSliderClick:function(event) {
+                            var slider = $('#' + event.data.instance.slider);
+                            var x = event.pageX;
+                            var y = event.pageY;
+                            var x_offset = x - slider.position().left;
+                            var percentage = x_offset * 100 / slider.width();
+                            //console.log('percentage', percentage);
+                            event.data.instance.updateSlider(x_offset/slider.width());
+                            event.data.instance.seek(percentage);
+                           
+                            
+                       }
+                       ,getInstance:function(playerId) {
+                            return this.INSTANCES[playerId];
+                       }
+                        
+                
+            }
+            
+            function playerInstance(playerId) {
+                var instance = {
+                    playerId:playerId
+                    ,toolbar: + '_toolbar'
+                    ,slider:playerId + '_toolbar_slider'
+                    ,btn_play:playerId + '_toolbar_btn0'
+                    ,plugin:playerId + '_plugin'
+                    ,timer:playerId + '_timer'
+                    ,status:null
+                    
+                    ,__getPlugin:function() {
+                        return $('#' + this.plugin)[0];
+                    }
+                    
+                    // JS API
+                    ,play:function(uri) {
+                        //console.log(this.__getPlugin());
+                        if (!this.__getPlugin()) {
+                            //console.log('wait');
+                            setTimeout("VLCobject.getInstance('" + this.playerId + "').play('" + uri + "');", 500);
+                            return;
+                        }
+                        var plugin = this.__getPlugin();
+                        var options = this.options.get();
+                        this.statusCheckStart();
+                        if (uri) {
+                            // alert(plugin);
+                            // alert(plugin.playlist);
+                            // alert(plugin.playlist.add);
+                            var id = plugin.playlist.add(uri, uri, options);
+                            plugin.playlist.playItem(id);
+                            }
+                        else {
+                            plugin.playlist.play();
+                        }
+                        
+                    }
+                    ,seek:function(percentage) {
+                        var plugin = this.__getPlugin();
+                        if (plugin.input.length > 0) {
+                            plugin.input.time = plugin.input.length * percentage / 100;
+                        }
+                    }
+                    ,togglePlay:function() {
+                        var plugin = this.__getPlugin();
+                        if (plugin.playlist.isPlaying) {
+                             plugin.playlist.togglePause();
+                        }
+                        else {
+                             plugin.playlist.play();
+                        }
+                        this.statusCheckStart();
+                        //plugin.playlist.togglePause();
+                        
+                    }
+                    ,stop:function() {
+                        var plugin = this.__getPlugin();
+                        plugin.playlist.stop();
+                        //this.statusCheckStop();
+                        // timeout to ensure to get last events
+                        setTimeout("VLCobject.getInstance('" + this.playerId + "').statusCheckStop();", 1000);
+                    }
+                    ,options:{
+                        get:function() {
+                            var tmp_array = new Array();
+                            var debug_str = "";
+                            var idx = 0;
+                            for (var i in this.options)
+                            {
+                                var option_str = ":" + i;
+                                if (this.options[i]) option_str += "=" + this.options[i];
+                                tmp_array[idx] = option_str;
+                                debug_str += option_str + " ";
+                                idx += 1;
+                            }
+                            if (document.all) return tmp_array;
+                            return debug_str;
+                        }
+                    
+                    }
+                    
+                    // private status stuff
+                    ,statusChanged:function() {
+                        //console.log('statusChanged ' + this.status);
+                        if (this.status == 3) {
+                            // playing
+                            this.setPlaying(true);
+                        }
+                        else {
+                            this.setPlaying(false);
+                            if (this.status != 4) {
+                                 this.updateSlider(0);
+                            }
+                            }
+                            
+                        return;
+                        // if (this.status == 4) {
+                            ////paused
+                            // VLCobject.setButton(this.playerId, 0, 'x-vlc-btn-play');
+                        // }
+                        // else if (this.status == 5) {
+                            ////stopped
+                            // VLCobject.setButton(this.playerId, 0, 'x-vlc-btn-play');
+                        // }
+                         // else if (this.status == 6) {
+                           //// ended
+                            // VLCobject.setButton(this.playerId, 0, 'x-vlc-btn-play');
+                        // }
+                         // else if (this.status == 0) {
+                           //// idle
+                            // VLCobject.setButton(this.playerId, 0, 'x-vlc-btn-play');
+                        // }
+                    }
+                     ,setPlaying:function(playing) {
+                            var tgt = $('#' + this.playerId + '_toolbar_btn0');
+                               
+                                if (playing) {
+                                     tgt.removeClass( 'x-vlc-btn-play' );
+                                    tgt.addClass( 'x-vlc-btn-pause' );
+                                   
+                                }
+                                else {
+                                    tgt.removeClass( 'x-vlc-btn-pause' );
+                                    tgt.addClass( 'x-vlc-btn-play' );
+                                }
+                           
+                             
+                       }
+                    ,statusCheck:function() {
+                   
+                        var plugin = this.__getPlugin();
+                         var status = plugin.input.state;
+                            //console.log(status);
+                            if (status != this.status) {
+                                     this.status = status;
+                                     this.statusChanged();
+                            }
+                        if (plugin.playlist.isPlaying) {
+                            // console.log(plugin.input.time);
+                            // console.log(plugin.input.length);
+                            // console.log(plugin.input.position);
+                           
+                            this.updatePosition(plugin.input.time / 1000, plugin.input.length / 1000)
+                            //console.log(plugin.get_length());
+                            }
+                           
+                    }
+                    ,statusCheckStart:function() {
+                        this.statusCheckStop();
+                        this.statusCheckTimer = setInterval("VLCobject.getInstance('" + this.playerId + "').statusCheck();", 300);
+                    }
+                    ,statusCheckStop:function() {
+                        clearTimeout(this.statusCheckTimer);
+                    }   
+                    ,secsToTime:function(secs)  {
+                        if (secs == 0) {
+                            return '00:00'
+                        }
+                        var secs = parseInt(secs );
+                        var mins = 0;
+               
+                        if (secs > 60) {
+                            mins = Math.floor(secs / 60);
+                            secs = parseInt((secs - (mins*60)));
+                        }
+                    // console.log('log', mins, secs);
+                    
+                        return this.pad(mins,2) + ':' + this.pad(secs, 2) ;
+                    }
+                    ,pad:function(number, length) {
+                           
+                            var str = '' + number;
+                            while (str.length < length) {
+                                str = '0' + str;
+                            }
+
+                            return str;
+
+                        }
+                    ,updateSlider:function(percentage) {
+                      //   console.log('updateSlider', $('#'+this.slider).width(),percentage);
+                        var td1 = $('#' + this.slider +' :first-child  :first-child :first-child');
+                        var td3 = $('#' + this.slider +' :first-child  :first-child :last-child');
+                       
+                       var offset = ($('#'+this.plugin).width() - (4 + 40 + 80) );
+                        //console.log('length slider', offset);
+                        var w= offset  * percentage ;
+                        //console.log(w);
+                        td1.width(w);
+                        w= offset  * (1-percentage) ;
+                        //console.log(w);
+                        td3.width(w);
+                    }
+                    ,updatePosition:function(position, length) {
+                        // update timer
+                         $('#' + this.timer).html(this.secsToTime(position) + '/' + this.secsToTime(length));
+                        var tb =   $('#' +this.playerId + '_toolbar_slider' );
+                        if (length == 0) {
+                            tb.html('unknown length'); 
+                            tb.sliderCreated = false
+                        }
+                        else {
+                           VLCobject.createSlider(this.playerId); 
+                            this.updateSlider(position/length);
+                        }
+                    }
+                    
+                    
+                }
+                
+                return instance;
+            }
+            
+                
+          if (!window.opera && document.all ) {
+                if (!VLCobject.unloadSet) {
+                    VLCobject.prepUnload = function() {
+                        __vlc_unloadHandler = function(){};
+                        __vlc_savedUnloadHandler = function(){};
+                            window.attachEvent("onunload", VLCobject.cleanupVLCs);
+                    }
+                    window.attachEvent("onbeforeunload", VLCobject.prepUnload);
+                    VLCobject.unloadSet = true;
+                }
+            }
+            
+           VLCobject.cleanupVLCs = function() {
+                var objects = document.getElementsByTagName("OBJECT");
+                for (var i = objects.length - 1; i >= 0; i--) {
+                    objects[i].style.display = 'none';
+                    for (var x in objects[i]) {
+                        if (typeof objects[i][x] == 'function') {
+                            objects[i][x] = function(){};
+                        }
+                    }
+                }
+            }
+            
+            $(document).ready(function() {
+                // put all your jQuery goodness in here.
+                var player = VLCobject.embedPlayer('vlc1', 400, 300, true);
+                player.play('http://www.revolunet.com/static/download/labo/VLCcontrols/bunny.mp4');
+                
+                var player2 = VLCobject.embedPlayer('vlc2', 160, 120, true);
+                player2.play('http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_480p_surround-fix.avi');
+                
+                
+              //  http://www.revolunet.com/static/download/labo/VLCcontrols/bunny.mp4
+                //VLCobject.addToolbar('vlc1');
+            });
+
+        </script>
+        <style>
+           
+            .x-vlc-slider {
+                background:silver;
+                text-align:center;
+             }
+             .x-vlc-slider-thumb {
+                background:navy;
+                width:3px;
+            }
+            .x-vlcplayer-main {
+             
+            }
+            .x-vlcplayer-toolbar {
+          
+                color:black;
+            
+            }
+             .x-vlcplayer-toolbar * {
+                  vertical-align:top;
+            
+                  }
+            .x-vlc-btn {
+               
+                padding-right:10px;
+              
+              
+            }
+            .x-vlc-btn:hover {
+                color:red;
+                
+            }
+            .x-vlc-btn-play {
+                
+                background:url(images/player_play.png) no-repeat;
+            }
+            .x-vlc-btn-stop {
+                background:url(images/player_stop.png) no-repeat;
+            
+            }
+            .x-vlc-btn-pause {
+                background:url(images/player_pause.png) no-repeat;
+            
+            }
+            .x-vlc-timer {
+                width:75px;
+                font-size:12px;
+                vertical-align:top;
+                text-align:center
+                
+              
+             
+            }
+        </style>
+
+    </head>
+    <body>
+    
+        <div id='vlc1'>player 1</div>
+        <br><br>
+        <div id='vlc2'>player 2</div>
+        <br><br>
+        <div id='vlc3'>player without toolbar</div>
+    
+    </body>
+</html> 
