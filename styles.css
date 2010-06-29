@@ -1,0 +1,60 @@
+.x-vlc-slider  {
+    background:#C7F2FF;
+    text-align:center;
+ 
+ }
+ .x-vlc-slider-thumb {
+    background:#4EAECC;
+    width:3px;
+}
+.x-vlc-main {
+ 
+}
+.x-vlc-toolbar {
+
+    color:black;
+
+}
+ .x-vlc-toolbar * {
+      vertical-align:top;
+
+      }
+.x-vlc-btn {
+   
+    padding-right:10px;
+  
+  
+}
+.x-vlc-btn-fullscreen {
+    background:url(images/fullscreen2.gif) no-repeat;
+}
+ .x-vlc-btn-plus {
+    background:url(images/plus2.gif) no-repeat;
+}
+.x-vlc-btn-moins {
+    background:url(images/moins2.gif) no-repeat;
+}
+.x-vlc-btn:hover {
+    color:red;
+    
+}
+.x-vlc-btn-play {
+    background:url(images/play2.gif) no-repeat;
+}
+.x-vlc-btn-stop {
+    background:url(images/stop2.gif) no-repeat;
+
+}
+.x-vlc-btn-pause {
+    background:url(images/pause2.gif) no-repeat;
+
+}
+.x-vlc-timer {
+    width:100px;
+    font-size:12px;
+    vertical-align:top;
+    text-align:center
+}
+.x-vlc-about {
+    font-size:10px;
+}
