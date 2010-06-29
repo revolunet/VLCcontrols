@@ -1,7 +1,9 @@
 VLC plugin javascript wrapper
 -----------------------------
 
-VLCcontrols is a cross browser javascript library to add controls to the VLC plugins (ActiveX and Mozilla). It uses VLCobject.js to detect and instantiate the VLC plugin. (based on [swfobject][3])
+VLCcontrols is a Jquery class that embeds and controls VLC in your webpage.
+
+Detection and embedding is based on [swfobject][3]
 
 recent VLC >= 1.0 new security restrictions disable lots of plugin functionnality (output). now need some serious rewrite so moved to github !
 
