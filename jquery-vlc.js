@@ -120,7 +120,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                             r = o;
                                     }
                             }
-                            //console.log('createVLC ' +r);
                             return r;
                     }
 
@@ -168,7 +167,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     
                     ,embedVLC:function(replaceElemIdStr, widthStr, heightStr, vlcVersionStr, flashvarsObj, parObj, attObj, callbackFn) {
                                         var callbackObj = {success:false, id:replaceElemIdStr};
-                                        //console.log(arguments);
                                         if (this.ua.w3 && !(this.ua.wk && this.ua.wk < 312) && replaceElemIdStr && widthStr && heightStr) {
                                                 //setVisibility(replaceElemIdStr, false);
                                                // addDomLoadEvent(function() {
@@ -357,7 +355,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     ,play:function(uri) {
                         var plugin = this.__getPlugin();
                         if (!plugin) {
-                            //console.log('wait');
                             setTimeout("VLCobject.getInstance('" + this.playerId + "').play('" + uri + "');", 500);
                             return;
                         }
@@ -448,7 +445,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                         
                     }
                     ,statusChanged:function() {
-                        //console.log('statusChanged ' + this.status);
                         if (!this.status) {
                             this.setStatusText(this.VLC_STATUS[0]);
                             var width = this.getSliderLength();
@@ -499,7 +495,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                         var plugin = this.__getPlugin();
                         if (!plugin.input) return;
                          var status = plugin.input.state;
-                            //console.log(status);
                             if (status != this.status) {
                                  this.status = status;
                                  this.statusChanged();
@@ -571,7 +566,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                             var width = this.getSliderLength();
                             tb.width(width);
                             this.sliderCreated = false
-                            //console.log('sliderCreated = false', this.sliderCreated, width);
                             if (position<1) this.statusChanged(); // force display stattus at startup
                         }
                         else {
@@ -583,7 +577,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                   
                     ,onSliderClick:function(event) {
                             var slider = $('#' + event.data.instance.slider);
-                            console.log(slider);
                             var x = event.pageX;
                             var y = event.pageY;
                             var x_offset = x - slider.position().left;
@@ -594,8 +587,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                             
                        }
                     ,createSlider:function() {
-                         //   if ( this.sliderCreated ) return;
-                           //console.log(' createSlider');
                            if ($('#' + slider_id).length > 0 && $('#' + table_id).length > 0) return;
                             var offset = this.getSliderLength();
                             var slider_id=  this.playerId + '_toolbar_slider'; 
@@ -605,7 +596,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                             
                             if ($('#' + slider_id).length == 0) {
                                 // div not preset exists
-                                console.log('not present')
                                 var tgt =   $('#' + this.playerId + '_toolbar' );
                                 var slider = "<div id='" + slider_id + "' width='" + (offset + 4)+"'  style='text-align:center;float:left;height:10px'>";
                                 //slider += progress
@@ -615,7 +605,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                             }
                             
                             if ($('#' + table_id).length == 0) {
-                                console.log('present')
                                 var slider = $('#' + slider_id );
                                 slider.html('');
                                 slider.append(progress);
