@@ -296,6 +296,7 @@ if (typeof(VLC_STATUS)=='undefined') {
                             else {
                                 var url = "http://www.videolan.org/vlc/";
                                 aboutTxt = "VLC non detecté. <a href='" + url + "' target='blank'>cliquez ici pour l'installer</a>";
+                                alert("VLC n'a pas été détécté\n\nRendez vous sur http://www.videolan.org/vlc pour le télécharger et l'installer.\n\nCochez les cases Activex/Mozilla pendant l'install");
                             }
                             
                             aboutTxt += '<br>widget crée par <a href="http://www.revolunet.com" target="blank" title="conseil intranet">revolunet</a>. &nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="alert(&quot;Vous devez installer le logiciel VLC \\n\\nen cochant les cases ActiveX/Mozilla pendant l\\&apos;installation.\\n\\nrécupérez VLC sur http://www.videolan.org/vlc&quot;);return false;" target="blank" >aide</a>';
@@ -350,9 +351,31 @@ if (typeof(VLC_STATUS)=='undefined') {
                     // JS API
                     ,version:function() {
                         var plugin = this.__getPlugin();
+                        var version = null;
                         if (!plugin) return false;
-                        var version = plugin.versionInfo;
-                        if(typeof(version)=="function") version = plugin.versionInfo();
+                        
+                           if(navigator.plugins && navigator.mimeTypes.length){
+                            var x = navigator.plugins["VLC Multimedia Plug-in"];
+                            if(!x) {
+                                // test with "old" plugin name
+                                x = navigator.plugins["VLC Multimedia Plugin"];
+                                }
+                            if(!x) {
+                                // 0.8.6a at least
+                                x = navigator.plugins["VLC multimedia plugin"];
+                            }
+
+                            if(x && x.description) {			
+                                version = x.description.substring(7, x.description.indexOf(','));
+                                
+                            }
+                          }
+                          else {
+                              
+                             version = plugin.versionInfo;
+                            if(typeof(version)=="function") version = plugin.versionInfo();
+                            }
+                        //alert(version);
                         return version;
                         
                     }
@@ -377,6 +400,7 @@ if (typeof(VLC_STATUS)=='undefined') {
                         this.statusCheckStart();
                         if (uri) {
                             var id = plugin.playlist.add(uri, uri, options);
+                        
                             plugin.playlist.playItem(id);
                             }
                         else {
