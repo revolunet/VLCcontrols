@@ -18,6 +18,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 
+// can be overriden
+
+if (typeof(VLC_STATUS)=='undefined') {
+    VLC_STATUS = {
+        0:'standby'
+        ,1:'opening'
+        ,2:'buffering'
+        ,3:'playing'
+        ,4:'paused'
+        ,5:'stopped'
+        ,6:'ended'
+        
+    }
+}
+
             var VLCobject = {
                      VLC_PLUGIN:"VLC Multimedia Plug-in"
                     ,VLC_AX:"VideoLAN.VLCPlugin.2"
@@ -434,19 +449,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     
           
                     // private status stuff
-                    ,VLC_STATUS:{
-                        0:'standby'
-                        ,1:'opening'
-                        ,2:'buffering'
-                        ,3:'playing'
-                        ,4:'paused'
-                        ,5:'stopped'
-                        ,6:'ended'
-                        
-                    }
+                   
                     ,statusChanged:function() {
                         if (!this.status) {
-                            this.setStatusText(this.VLC_STATUS[0]);
+                            this.setStatusText(VLC_STATUS[0]);
                             var width = this.getSliderLength();
                             var tb =   $('#' +this.playerId + '_toolbar_slider' );
                             tb.width(width);
@@ -464,13 +470,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                  this.updateSlider(0);
                             }
                             if ((this.status == 0 || this.status == 5 || this.status == 6) ) {
-                                this.setStatusText(this.VLC_STATUS[this.status]);
+                                this.setStatusText(VLC_STATUS[this.status]);
                                 this.sliderCreated  = false;
                             }
                             
                      }
                
-                        if(!this.sliderCreated)  this.setStatusText(this.VLC_STATUS[this.status]);
+                        if(!this.sliderCreated)  this.setStatusText(VLC_STATUS[this.status]);
                         return;
        
                     }
