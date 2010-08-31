@@ -298,7 +298,7 @@ if (typeof(VLC_STATUS)=='undefined') {
                                 aboutTxt = "VLC non detecté. <a href='" + url + "' target='blank'>cliquez ici pour l'installer</a>";
                             }
                             
-                            aboutTxt += '<br>widget crée par <a href="http://www.revolunet.com" target="blank" title="conseil intranet">revolunet</a>. &nbsp;&nbsp;&nbsp;&nbsp;<a href="#" target="blank" >aide</a>';
+                            aboutTxt += '<br>widget crée par <a href="http://www.revolunet.com" target="blank" title="conseil intranet">revolunet</a>. &nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="alert(&quot;Vous devez installer le logiciel VLC \\n\\nen cochant les cases ActiveX/Mozilla pendant l\\&apos;installation.\\n\\nrécupérez VLC sur http://www.videolan.org/vlc&quot;);return false;" target="blank" >aide</a>';
                             tgt.append('<div id="' + playerId + '_about" class="x-vlc-about" style="display:none" class="x-vlc-about">' + aboutTxt + '</div>');
                             tgt.show();
                        }
